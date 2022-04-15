@@ -2,6 +2,18 @@
 
 [< Previous Module](../modules/module09.md) - **[Home](../README.md)** - [Next Module >](../modules/module11.md)
 
+## :loudspeaker: Introduction
+
+While Purview Studio is the default interface for Azure Purview, the underlying platform can be accessed via a set of APIs. This opens up the possibility of a variety of scenarios including:
+
+  * Working with Azure Purview assets programmatically (e.g. bulk create/read/update/delete).
+  * Adding support for other data sources beyond those supported out of the box.
+  * Extending the lineage functionality to other ETL processes.
+  * Embedding Azure Purview asset data within custom user experiences.
+  * Triggering Azure Purview scans to run off the back of a custom event.
+
+The primary focus of this module is the **catalog** which is based on the open-source [Apache Atlas](https://atlas.apache.org/) project. Read below for more details on Apache Atlas and how it relates to Azure Purview.
+
 ## :thinking: Prerequisites
 
 * An [Azure account](https://azure.microsoft.com/en-us/free/) with an active subscription.
@@ -10,17 +22,6 @@
 ## :hammer: Tools
 
 * [Postman](https://www.postman.com/product/rest-client/) (Download and Install)
-
-## :loudspeaker: Introduction
-
-While Purview Studio is the default method of interfacing with Azure Purview, the underlying platform can be accessed via a set of API's. This opens up the possibility of a variety of scenarios including:  
-  * Working with Azure Purview assets programmatically (e.g. bulk create/read/update/delete).
-  * Adding support for other data sources beyond those supported out of the box.
-  * Extending the lineage functionality to other ETL processes.
-  * Embedding Azure Purview asset data within custom user experiences.
-  * Triggering Azure Purview scans to run off the back of a custom event.
-
-The primary focus of this module is the **catalog** which is based on the open-source [Apache Atlas](https://atlas.apache.org/) project. Read below for more details on Apache Atlas and how it relates to Azure Purview.
 
 ## :dart: Objectives
 
@@ -36,6 +37,12 @@ The primary focus of this module is the **catalog** which is based on the open-s
 4. [Provide Service Principal Access to Azure Purview](#4-provide-service-principal-access-to-azure-purview)
 5. [Get an Access Token](#5-get-an-access-token)
 6. [Read data from Azure Purview](#6-read-data-from-azure-purview)
+7. [Read glossary in Azure Purview](#7-read-glossary-in-azure-purview)
+8. [Create glossary terms](#8-create-glossary-terms)
+9. [Add/edit simple attribute for a glossary term](#9-addedit-simple-attribute-for-a-glossary-term)
+10. [Add/edit complex attribute for a glossary term](#10-addedit-complex-attribute-for-a-glossary-term)
+11. [Delete glossary term](#11-delete-glossary-term)
+12. [Register custom entity types and lineage](#12-register-custom-entity-types-and-lineage)
 
 
 <div align="right"><a href="#module-10---rest-api">↥ back to top</a></div>
@@ -675,7 +682,6 @@ To invoke the REST API, we must first register an application (i.e. service prin
 
 3. **Copy** the client secret value for later use.
 
-
     > :bulb: **Did you know?**
     >
     > A **client secret** is a secret string that the application uses to prove its identity when requesting a token, this can also can be referred to as an application password.
@@ -719,7 +725,7 @@ To invoke the REST API, we must first register an application (i.e. service prin
     | client_secret | `YOUR_CLIENT_SECRET` |
     | resource | `https://purview.azure.net` |
 
-    ![](../images/module10/10.09-postman-login.png)
+    ![](../images/module10/rest01.png)
 
 <div align="right"><a href="#module-10---rest-api">↥ back to top</a></div>
 
@@ -761,7 +767,359 @@ To invoke the REST API, we must first register an application (i.e. service prin
 
 
 <div align="right"><a href="#module-10---rest-api">↥ back to top</a></div>
+ 
+ 
+ ## 7. Read glossary in Azure Purview
+ 
+ 1. Using [Postman](https://www.postman.com/product/rest-client/) once more, create a new **HTTP request** as per the details below. 
 
+    * Paste the copied endpoint into the URL (e.g. `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog`)
+    * Add the following at the end of the URL to complete the endpoint: `/api/atlas/v2/glossary`
+
+    Note: Calling this particular endpoint will result in the bulk retrieval of all **existing glossary terms**.
+
+    | Property | Value |
+    | --- | --- |
+    | HTTP Method | `GET` |
+    | URL | `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog/api/atlas/v2/glossary` |
+
+    Navigate to **Headers**, provide the following key value pair, click **Send**.
+
+    | Header Key | Header Value |
+    | --- | --- |
+    | Authorization | `Bearer YOUR_ACCESS_TOKEN` |
+
+    Note: You generated an `access_token` in the previous request. Copy and paste this value. Ensure to include the "Bearer " prefix.
+ 
+ ![](../images/module10/10.16-read-glossary.png)
+ 
+  2. If successful, Postman should return a JSON document in the body of the response.  Save your **glossary guid** for later use – this is on the first line in the json response, as shown below (e.g. guid: "ef3ab74e-f517-47c0-b56f-1fd4d6eb8493")
+ 
+  ![](../images/module10/10.17-read-glossary-200OK.png)
+
+<div align="right"><a href="#module-10---rest-api">↥ back to top</a></div>
+ 
+## 8. Create glossary terms
+ 1. Using [Postman](https://www.postman.com/product/rest-client/) once more, create a new **HTTP request** as per the details below. 
+
+    * Paste the copied endpoint into the URL (e.g. `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog`)
+    * Add the following at the end of the URL to complete the endpoint: `/api/atlas/v2/glossary/term?includeTermHierarchy=True`
+
+    Note: Calling this particular endpoint will result in **creating a glossary term**.
+
+    | Property | Value |
+    | --- | --- |
+    | HTTP Method | `POST` |
+    | URL | `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog/api/atlas/v2/glossary/term?includeTermHierarchy=True` |
+
+    Navigate to **Headers**, provide the following key value pair:
+
+    | Header Key | Header Value |
+    | --- | --- |
+    | Authorization | `Bearer YOUR_ACCESS_TOKEN` |
+
+    Note: You generated an `access_token` in the previous request. Copy and paste this value. Ensure to include the "Bearer " prefix.
+ 
+ ![](../images/module10/10.18-create-term-auth.png)
+ 
+Navigate to **Body** and for the **raw** section, select **JSON** option. To create a basic glossary term, add the minimum mandatory payload, by providing the glossary guid (saved at the previous exercise) and the name for your new term, then click **Send**.
+ 
+  ![](../images/module10/10.19-create-term-body.png)
+ 
+ 2. If successful, Postman should return a JSON document in the body of the response. Save your **termGuid** for later use – this is on the first line in the json response, as shown below (e.g. guid: " a8859aa4-f3b1-47ee-b835-8ec8c07d0638")
+ 
+  ![](../images/module10/10.20-create-term-200OK.png)
+ 
+ 3. Navigate to **Purview Studio > Manage Glossary** and write in the search bar the name of your newly created term to check if this appears in your glossary:
+ 
+ ![](../images/module10/10.21-create-term-studio.png)
+ 
+ <div align="right"><a href="#module-10---rest-api">↥ back to top</a></div>
+ 
+ Note: If you don’t specify the status when you create a glossary term, by default it appears in **“Draft”** mode.
+ 
+## 9. Add/edit simple attribute for a glossary term
+ 
+ 1. Using [Postman](https://www.postman.com/product/rest-client/) once more, create a new **HTTP request** as per the details below. 
+
+    * Paste the copied endpoint into the URL (e.g. `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog`)
+    * Add the following at the end of the URL to complete the endpoint: `/api/atlas/v2/glossary/term/{termGuid}?includeTermHierarchy=True`, using the **termGuid** saved at the previous exercise
+
+    Note: Calling this particular endpoint will result in **updating a glossary term**.
+
+    | Property | Value |
+    | --- | --- |
+    | HTTP Method | `PUT` |
+    | URL | `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog/api/atlas/v2/glossary/term/{termGuid}?includeTermHierarchy=True` |
+
+    Navigate to **Headers**, provide the following key value pair:
+
+    | Header Key | Header Value |
+    | --- | --- |
+    | Authorization | `Bearer YOUR_ACCESS_TOKEN` |
+
+    Note: You generated an `access_token` in the previous request. Copy and paste this value. Ensure to include the "Bearer " prefix.
+ 
+  ![](../images/module10/10.22-edit-term-auth.png)
+ 
+Navigate to **Body** and for the **raw** section, select **JSON** option. To update a simple attribute for your glossary term, add the minimum mandatory payload, by providing the **glossary guid** (saved at the previous exercise) and the **nickName** for your term, add the attribute you want to update – in this exercise, you will modify the **Status** from **Draft** (the default when a new term is created) to **Approved**, then click **Send**.
+ 
+ ![](../images/module10/10.23-edit-term-body.png)
+ 
+ 2. If successful, Postman should return a JSON document in the body of the response:
+ 
+ ![](../images/module10/10.24-edit-term-200OK.png)
+ 
+ 3. Navigate to **Purview Studio > Manage Glossary** and write in the search bar the name of your term to check if this appears with the new status:
+ 
+ ![](../images/module10/10.25-edit-term-studio.png)
+ 
+ <div align="right"><a href="#module-10---rest-api">↥ back to top</a></div>
+ 
+## 10. Add/edit complex attribute for a glossary term
+ 1. Using [Postman](https://www.postman.com/product/rest-client/) once more, create a new **HTTP request** as per the details below. 
+
+    * Paste the copied endpoint into the URL (e.g. `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog`)
+    * Add the following at the end of the URL to complete the endpoint: `/api/atlas/v2/glossary/term/{termGuid}?includeTermHierarchy=True`, using the **termGuid** saved at the previous exercise
+
+    Note: Calling this particular endpoint will result in **updating a glossary term**.
+
+    | Property | Value |
+    | --- | --- |
+    | HTTP Method | `PUT` |
+    | URL | `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog/api/atlas/v2/glossary/term/{termGuid}?includeTermHierarchy=True` |
+
+    Navigate to **Headers**, provide the following key value pair:
+
+    | Header Key | Header Value |
+    | --- | --- |
+    | Authorization | `Bearer YOUR_ACCESS_TOKEN` |
+
+    Note: You generated an `access_token` in the previous request. Copy and paste this value. Ensure to include the "Bearer " prefix.
+ 
+  ![](../images/module10/10.22-edit-term-auth.png)
+ 
+Navigate to **Body** and for the **raw** section, select **JSON** option. In this exercise you will add contacts to your glossary term. First, you need to add the minimum mandatory payload, by providing the **glossary guid** (saved at the previous exercise) and the **nickName** for your term, then add the contacts object that include both **Steward** and **Expert**.  
+ 
+ ![](../images/module10/10.26-edit-contacts-body.png)
+ 
+ For this exercise, to get the Expert/Steward id, you can go to the Azure Active Directory and copy the id next to your name: 
+ 
+  ![](../images/module10/10.27-AAD-ids.png)
+ 
+ After you add the details in the JSON section, click **Send**.
+ 
+ 2. If successful, Postman should return a JSON document in the body of the response:
+ 
+ ![](../images/module10/10.28-edit-contacts-200OK.png)
+ 
+ 3. Navigate to **Purview Studio > Manage Glossary** and write in the search bar the name of your term to check if this appears with the corresponding contacts:
+ 
+ ![](../images/module10/10.29-edit-contacts-studio.png)
+ 
+ <div align="right"><a href="#module-10---rest-api">↥ back to top</a></div>
+  
+
+ 
+## 11. Delete glossary term
+ 
+ 1. Using [Postman](https://www.postman.com/product/rest-client/) once more, create a new **HTTP request** as per the details below. 
+
+    * Paste the copied endpoint into the URL (e.g. `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog`)
+    * Add the following at the end of the URL to complete the endpoint: `/api/atlas/v2/glossary/term/{termGuid}`
+
+    Note: Calling this particular endpoint will result in **deleting a glossary term**.
+
+    | Property | Value |
+    | --- | --- |
+    | HTTP Method | `DELETE` |
+    | URL | `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog/api/atlas/v2/glossary/term/{termGuid}` |
+
+    Navigate to **Headers**, provide the following key value pair, click **Send**.
+
+    | Header Key | Header Value |
+    | --- | --- |
+    | Authorization | `Bearer YOUR_ACCESS_TOKEN` |
+
+    Note: You generated an `access_token` in the previous request. Copy and paste this value. Ensure to include the "Bearer " prefix.
+ 
+  ![](../images/module10/10.30-delete-term.png)
+ 
+ 2. If successful, Postman should return a JSON document in the body of the response:
+ 
+   ![](../images/module10/10.30-delete-term-204.png)
+ 
+ 3. Navigate to **Purview Studio > Manage Glossary** and write in the search bar the name of your deleted term to check this is no longer in your glossary:
+ 
+ ![](../images/module10/10.31-delete-term-studio.png)
+ 
+ <div align="right"><a href="#module-10---rest-api">↥ back to top</a></div>
+
+## 12. Register custom entity types and lineage
+
+1. Within the Azure portal, open the Azure Purview account, navigate to **Properties** and find the **Atlas endpoint**. **Copy** this value for later use.
+
+    ![Purview Properties](../images/module10/10.11-purview-properties.png)
+
+3. Using [Postman](https://www.postman.com/product/rest-client/) once more, create a new **HTTP request** as per the details below. 
+
+    * Paste the copied endpoint into the URL (e.g. `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog`)
+    * Add the following at the end of the URL to complete the endpoint: `/api/atlas/v2/types/typedefs`
+
+    Note: Calling this particular endpoint will result in the bulk retrieval of all **type definitions**.
+
+    | Property | Value |
+    | --- | --- |
+    | HTTP Method | `POST` |
+    | URL | `https://YOUR_PURVIEW_ACCOUNT.purview.azure.com/catalog/api/atlas/v2/types/typedefs` |
+
+    * In Postman, Navigate to **Auth**, provide the auth code from the previous step.
+
+    ![Purview Properties](../images/module10/rest02.png)
+
+    * In Postman, Navigate to **Body**, and copy paste the content from below.
+
+   ```json
+   {
+      "entityDefs":[
+         {
+            "category":"ENTITY",
+            "version":1,
+            "name":"Custom Source",
+            "description":"Custom database source",
+            "typeVersion":"1.0",
+            "attributeDefs":[
+               {
+                  "name":"CustomAttribute",
+                  "typeName":"string",
+                  "isOptional":true
+               }
+            ],
+            "superTypes":[
+               "DataSet"
+            ],
+            "subTypes":[
+               
+            ],
+            "relationshipAttributeDefs":[
+               
+            ]
+         }
+      ]
+   }
+   ```
+
+   * Submit and validate your output.
+
+   ![](../images/module10/rest03.png)
+
+   * If successful, Postman should return a JSON document in the body of the response. 
+
+4. Create two custom entities. 
+
+    * Add the following at the end of the URL to complete the endpoint: `/api/atlas/v2/entity`
+
+    * Replace the body with the following code block
+
+   ```json
+   {
+      "entity":{
+         "meanings":[
+            
+         ],
+         "status":"ACTIVE",
+         "version":0,
+         "typeName":"Custom Source",
+         "attributes":{
+            "qualifiedName":"custom://customdatabase/orders",
+            "name":"orders table",
+            "description":"orders description",
+            "principalId":0,
+            "objectType":null,
+            "CustomAttribute":"It works!"
+         }
+      }
+   }
+   ```
+
+   * Submit and validate your output. **Important:** copy paste the GUID from the newly created entity. You'll need it in the next section when creating custom lineage.
+
+   ![](../images/module10/rest04.png)
+
+   * By now, you can also view and validate your results in Purview.
+
+   ![](../images/module10/rest05.png)
+
+   * Repeat the steps for a second entity:
+
+   ```json
+   {
+      "entity":{
+         "meanings":[
+            
+         ],
+         "status":"ACTIVE",
+         "version":0,
+         "typeName":"Custom Source",
+         "attributes":{
+            "qualifiedName":"custom://customdatabase/customers",
+            "name":"customers table",
+            "description":"customers description",
+            "principalId":0,
+            "objectType":null,
+            "CustomAttribute":"It works!"
+         }
+      }
+   }
+   ```
+
+   * Submit and validate your output.
+
+   * You will have two newly created entities. Also validate within your Azure Purview Studio environment that these new entities are created. Don't forget to capture the GUID from the second entity.
+
+   ![](../images/module10/rest06.png)
+
+   ![](../images/module10/rest07.png)
+
+5. Create custom lineage.
+
+   * Replace the body with the following code. Replace the GUIDs with the ones captured in the previous section. 
+
+   ```json
+   {
+      "entity":{
+         "status":"ACTIVE",
+         "version":0,
+         "typeName":"Process",
+         "attributes":{
+            "inputs":[
+               {
+                  "guid":"e18cdcc6-c7ff-4d7a-ae7e-048c5e60a1dc"
+               }
+            ],
+            "outputs":[
+               {
+                  "guid":"c71fa5b2-ff5a-4b54-96e2-487962a05af5"
+               }
+            ],
+            "qualifiedName":"apacheatlas://customlineage01",
+            "name":"customlineage01"
+         }
+      }
+   }
+   ```
+
+   * Submit and validate your output.
+
+   ![](../images/module10/rest08.png)
+
+   ![](../images/module10/rest09.png)
+
+   ![](../images/module10/rest10.png)
+
+
+<div align="right"><a href="#module-10---rest-api">↥ back to top</a></div>
+ 
 ## :mortar_board: Knowledge Check
 
 [http://aka.ms/purviewlab/q10](http://aka.ms/purviewlab/q10)
